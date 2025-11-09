@@ -8,9 +8,17 @@ const WatchHistory = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Загружаем историю просмотров из localStorage
-    const watchHistory = getWatchHistory()
-    setHistory(watchHistory)
+    // Загружаем историю просмотров
+    const loadHistory = async () => {
+      try {
+        const watchHistory = await getWatchHistory()
+        setHistory(watchHistory)
+      } catch (err) {
+        console.error('Ошибка загрузки истории:', err)
+      }
+    }
+
+    loadHistory()
   }, [])
 
   const handleVideoClick = (videoId) => {

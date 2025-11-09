@@ -11,25 +11,34 @@ const VideoPlayer = () => {
 
   useEffect(() => {
     // Загружаем информацию о видео из утвержденных
-    const approvedVideos = getApprovedVideos()
-    const foundVideo = approvedVideos.find(v => v.id === videoId)
+    const loadVideo = async () => {
+      try {
+        const approvedVideos = await getApprovedVideos()
+        const foundVideo = approvedVideos.find(v => v.id === videoId)
 
-    if (foundVideo) {
-      const videoData = {
-        id: foundVideo.id,
-        title: foundVideo.title,
-        channel: foundVideo.channel,
-        thumbnail: foundVideo.thumbnail,
-        embedUrl: `https://www.youtube.com/embed/${foundVideo.id}?autoplay=1`
+        if (foundVideo) {
+          const videoData = {
+            id: foundVideo.id,
+            title: foundVideo.title,
+            channel: foundVideo.channel,
+            thumbnail: foundVideo.thumbnail,
+            embedUrl: `https://www.youtube.com/embed/${foundVideo.id}?autoplay=1`
+          }
+
+          setVideo(videoData)
+
+          // Добавляем в историю просмотров
+          await addToWatchHistory(foundVideo)
+        } else {
+          setError('Видео не найдено в списке утвержденных')
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки видео:', err)
+        setError('Ошибка при загрузке видео')
       }
-
-      setVideo(videoData)
-
-      // Добавляем в историю просмотров
-      addToWatchHistory(foundVideo)
-    } else {
-      setError('Видео не найдено в списке утвержденных')
     }
+
+    loadVideo()
   }, [videoId])
 
   const handleBack = () => {
