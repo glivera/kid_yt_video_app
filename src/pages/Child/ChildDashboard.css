@@ -1,0 +1,57 @@
+.child-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.child-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.child-title {
+  color: #333;
+  font-size: 2rem;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+}
+
+.child-nav {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 40px;
+  display: flex;
+  gap: 10px;
+}
+
+.child-nav-link {
+  padding: 12px 30px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 600;
+  background: white;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.child-nav-link:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.child-nav-link.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.child-content {
+  padding: 40px;
+}
