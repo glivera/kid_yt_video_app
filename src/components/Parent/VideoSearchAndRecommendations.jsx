@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './ParentComponents.css'
+import { searchVideos } from '../../services/youtubeApi'
+import { addApprovedVideo } from '../../services/storage'
 
 const VideoSearchAndRecommendations = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -8,6 +10,8 @@ const VideoSearchAndRecommendations = () => {
   const [activeCategory, setActiveCategory] = useState(null)
   const [hoveredVideo, setHoveredVideo] = useState(null)
   const [previewVideo, setPreviewVideo] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const categories = [
     { id: 'learning', name: 'Обучение и развитие', topics: ['Алфавит', 'Цифры', 'Цвета', 'Формы'] },
@@ -24,29 +28,23 @@ const VideoSearchAndRecommendations = () => {
     { value: '9-12', label: '9-12 лет' }
   ]
 
-  const performSearch = (query) => {
+  const performSearch = async (query) => {
     console.log('Поиск:', query, 'возраст:', selectedAge)
-    // TODO: Интеграция с YouTube API
-    // Заглушка для демонстрации
-    const placeholderThumbnail = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBUaHVtYm5haWw8L3RleHQ+PC9zdmc+'
-    setSearchResults([
-      {
-        id: '1',
-        title: `Образовательное видео: ${query}`,
-        channel: 'Детский канал',
-        thumbnail: placeholderThumbnail,
-        duration: '10:25',
-        description: `Обучающее видео для детей ${selectedAge} лет по теме "${query}"`
-      },
-      {
-        id: '2',
-        title: `Развивающий контент: ${query}`,
-        channel: 'Учимся играя',
-        thumbnail: placeholderThumbnail,
-        duration: '8:15',
-        description: `Интересное видео про ${query.toLowerCase()}`
-      }
-    ])
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Формируем поисковый запрос с учетом возраста
+      const searchQuery = `${query} для детей ${selectedAge} лет обучающее`
+      const results = await searchVideos(searchQuery, 10)
+      setSearchResults(results)
+    } catch (err) {
+      console.error('Ошибка поиска:', err)
+      setError(err.message || 'Ошибка при поиске видео. Проверьте API ключ в .env файле.')
+      setSearchResults([])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleSearch = (e) => {
@@ -72,7 +70,8 @@ const VideoSearchAndRecommendations = () => {
 
   const handleApprove = (video) => {
     console.log('Утвердить видео:', video)
-    // TODO: Сохранить в список утвержденных
+    addApprovedVideo(video)
+    alert(`Видео "${video.title}" добавлено в список утвержденных!`)
     if (previewVideo) {
       setPreviewVideo(null)
     }
@@ -149,10 +148,24 @@ const VideoSearchAndRecommendations = () => {
         </div>
       </div>
 
+      {/* Состояние загрузки */}
+      {isLoading && (
+        <div className="loading-state" style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Поиск видео...</p>
+        </div>
+      )}
+
+      {/* Сообщение об ошибке */}
+      {error && (
+        <div className="error-state" style={{ textAlign: 'center', padding: '40px', color: '#d32f2f' }}>
+          <p>{error}</p>
+        </div>
+      )}
+
       {/* Результаты поиска */}
-      {searchResults.length > 0 && (
+      {!isLoading && !error && searchResults.length > 0 && (
         <div className="search-results">
-          <h3>Результаты поиска</h3>
+          <h3>Результаты поиска ({searchResults.length})</h3>
           {searchResults.map((video) => (
             <div key={video.id} className="video-card">
               <div
@@ -203,7 +216,7 @@ const VideoSearchAndRecommendations = () => {
         </div>
       )}
 
-      {searchResults.length === 0 && (
+      {!isLoading && !error && searchResults.length === 0 && (
         <div className="empty-state">
           <p>Введите поисковый запрос или выберите тему для поиска видео</p>
         </div>
