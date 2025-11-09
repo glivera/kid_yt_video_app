@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getApprovedVideos } from '../../services/storage'
 import './ChildComponents.css'
 
 const VideoList = () => {
@@ -7,8 +8,9 @@ const VideoList = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // TODO: Загрузить утвержденные видео из API
-    setVideos([])
+    // Загружаем утвержденные видео из localStorage
+    const approvedVideos = getApprovedVideos()
+    setVideos(approvedVideos)
   }, [])
 
   const handleVideoClick = (videoId) => {

@@ -1,27 +1,53 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { getApprovedVideos, addToWatchHistory } from '../../services/storage'
 import './ChildComponents.css'
 
 const VideoPlayer = () => {
   const { videoId } = useParams()
   const navigate = useNavigate()
   const [video, setVideo] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    // TODO: Загрузить информацию о видео и записать в историю
-    console.log('Воспроизведение видео:', videoId)
+    // Загружаем информацию о видео из утвержденных
+    const approvedVideos = getApprovedVideos()
+    const foundVideo = approvedVideos.find(v => v.id === videoId)
 
-    // Заглушка
-    setVideo({
-      id: videoId,
-      title: 'Пример видео',
-      channel: 'Детский канал',
-      embedUrl: `https://www.youtube.com/embed/${videoId}`
-    })
+    if (foundVideo) {
+      const videoData = {
+        id: foundVideo.id,
+        title: foundVideo.title,
+        channel: foundVideo.channel,
+        thumbnail: foundVideo.thumbnail,
+        embedUrl: `https://www.youtube.com/embed/${foundVideo.id}?autoplay=1`
+      }
+
+      setVideo(videoData)
+
+      // Добавляем в историю просмотров
+      addToWatchHistory(foundVideo)
+    } else {
+      setError('Видео не найдено в списке утвержденных')
+    }
   }, [videoId])
 
   const handleBack = () => {
     navigate('/child/videos')
+  }
+
+  if (error) {
+    return (
+      <div className="video-player">
+        <button onClick={handleBack} className="back-button">
+          ← Назад к видео
+        </button>
+        <div className="error-message" style={{ textAlign: 'center', padding: '40px' }}>
+          <p>{error}</p>
+          <p>Попроси родителей одобрить это видео!</p>
+        </div>
+      </div>
+    )
   }
 
   if (!video) {
