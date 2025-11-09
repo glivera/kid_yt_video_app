@@ -8,9 +8,17 @@ const VideoList = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Загружаем утвержденные видео из localStorage
-    const approvedVideos = getApprovedVideos()
-    setVideos(approvedVideos)
+    // Загружаем утвержденные видео
+    const loadVideos = async () => {
+      try {
+        const approvedVideos = await getApprovedVideos()
+        setVideos(approvedVideos)
+      } catch (err) {
+        console.error('Ошибка загрузки видео:', err)
+      }
+    }
+
+    loadVideos()
   }, [])
 
   const handleVideoClick = (videoId) => {

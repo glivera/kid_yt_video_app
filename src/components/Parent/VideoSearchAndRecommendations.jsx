@@ -68,12 +68,17 @@ const VideoSearchAndRecommendations = () => {
     setPreviewVideo(null)
   }
 
-  const handleApprove = (video) => {
+  const handleApprove = async (video) => {
     console.log('Утвердить видео:', video)
-    addApprovedVideo(video)
-    alert(`Видео "${video.title}" добавлено в список утвержденных!`)
-    if (previewVideo) {
-      setPreviewVideo(null)
+    try {
+      await addApprovedVideo(video)
+      alert(`Видео "${video.title}" добавлено в список утвержденных!`)
+      if (previewVideo) {
+        setPreviewVideo(null)
+      }
+    } catch (err) {
+      console.error('Ошибка при сохранении видео:', err)
+      alert('Ошибка при сохранении видео')
     }
   }
 
