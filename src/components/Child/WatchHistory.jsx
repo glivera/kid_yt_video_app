@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getWatchHistory } from '../../services/storage'
 import './ChildComponents.css'
 
 const WatchHistory = () => {
@@ -7,8 +8,9 @@ const WatchHistory = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // TODO: Загрузить историю просмотров
-    setHistory([])
+    // Загружаем историю просмотров из localStorage
+    const watchHistory = getWatchHistory()
+    setHistory(watchHistory)
   }, [])
 
   const handleVideoClick = (videoId) => {
