@@ -28,12 +28,13 @@ const VideoSearchAndRecommendations = () => {
     console.log('Поиск:', query, 'возраст:', selectedAge)
     // TODO: Интеграция с YouTube API
     // Заглушка для демонстрации
+    const placeholderThumbnail = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBUaHVtYm5haWw8L3RleHQ+PC9zdmc+'
     setSearchResults([
       {
         id: '1',
         title: `Образовательное видео: ${query}`,
         channel: 'Детский канал',
-        thumbnail: 'https://via.placeholder.com/320x180',
+        thumbnail: placeholderThumbnail,
         duration: '10:25',
         description: `Обучающее видео для детей ${selectedAge} лет по теме "${query}"`
       },
@@ -41,7 +42,7 @@ const VideoSearchAndRecommendations = () => {
         id: '2',
         title: `Развивающий контент: ${query}`,
         channel: 'Учимся играя',
-        thumbnail: 'https://via.placeholder.com/320x180',
+        thumbnail: placeholderThumbnail,
         duration: '8:15',
         description: `Интересное видео про ${query.toLowerCase()}`
       }
