@@ -7,18 +7,30 @@ const VideoList = () => {
   const [videos, setVideos] = useState([])
   const navigate = useNavigate()
 
+  const loadVideos = async () => {
+    try {
+      console.log('Loading approved videos...')
+      const approvedVideos = await getApprovedVideos()
+      console.log('Loaded videos:', approvedVideos)
+      setVideos(approvedVideos)
+    } catch (err) {
+      console.error('Ошибка загрузки видео:', err)
+    }
+  }
+
   useEffect(() => {
-    // Загружаем утвержденные видео
-    const loadVideos = async () => {
-      try {
-        const approvedVideos = await getApprovedVideos()
-        setVideos(approvedVideos)
-      } catch (err) {
-        console.error('Ошибка загрузки видео:', err)
-      }
+    loadVideos()
+  }, [])
+
+  // Обновляем список при каждом возврате на страницу
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('Page focused, reloading videos')
+      loadVideos()
     }
 
-    loadVideos()
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [])
 
   const handleVideoClick = (videoId) => {
@@ -27,7 +39,22 @@ const VideoList = () => {
 
   return (
     <div className="video-list">
-      <h2 className="video-list-title">Твои видео</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 className="video-list-title">Твои видео</h2>
+        <button
+          onClick={loadVideos}
+          style={{
+            padding: '8px 16px',
+            background: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          🔄 Обновить
+        </button>
+      </div>
 
       {videos.length > 0 ? (
         <div className="video-grid-child">

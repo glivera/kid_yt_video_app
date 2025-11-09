@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Storage</title>
+</head>
+<body>
+    <h1>Test Storage Debug</h1>
+    <button onclick="checkStorage()">Check localStorage</button>
+    <button onclick="clearStorage()">Clear localStorage</button>
+    <pre id="output"></pre>
+
+    <script>
+        function checkStorage() {
+            const output = document.getElementById('output');
+            const approvedVideos = localStorage.getItem('approvedVideos');
+
+            output.textContent = 'approvedVideos in localStorage:\n' +
+                                JSON.stringify(JSON.parse(approvedVideos || '[]'), null, 2);
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            alert('localStorage cleared!');
+            checkStorage();
+        }
+
+        // Auto check on load
+        window.onload = checkStorage;
+    </script>
+</body>
+</html>

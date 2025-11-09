@@ -49,6 +49,9 @@ const getApprovedVideosFromLocalStorage = () => {
 
 export const addApprovedVideo = async (video) => {
   const userId = getCurrentUserId()
+  console.log('addApprovedVideo called with:', video)
+  console.log('Current userId:', userId)
+  console.log('Supabase configured:', isSupabaseConfigured())
 
   if (isSupabaseConfigured()) {
     try {
@@ -81,27 +84,37 @@ export const addApprovedVideo = async (video) => {
         }])
 
       if (error) throw error
+      console.log('Video added to Supabase successfully')
       return await getApprovedVideos()
     } catch (error) {
       console.error('Error adding approved video to Supabase:', error)
       // Fallback to localStorage
+      console.log('Falling back to localStorage')
       return addApprovedVideoToLocalStorage(video)
     }
   } else {
+    console.log('Supabase not configured, using localStorage')
     return addApprovedVideoToLocalStorage(video)
   }
 }
 
 const addApprovedVideoToLocalStorage = (video) => {
+  console.log('addApprovedVideoToLocalStorage called')
   const videos = getApprovedVideosFromLocalStorage()
+  console.log('Current videos in localStorage:', videos.length)
   const exists = videos.find(v => v.id === video.id)
 
   if (!exists) {
-    videos.push({
+    const videoToAdd = {
       ...video,
       approvedAt: new Date().toISOString()
-    })
+    }
+    videos.push(videoToAdd)
+    console.log('Adding video to localStorage:', videoToAdd)
     localStorage.setItem('approvedVideos', JSON.stringify(videos))
+    console.log('Video saved. Total videos now:', videos.length)
+  } else {
+    console.log('Video already exists in localStorage')
   }
 
   return videos
