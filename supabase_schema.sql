@@ -1,5 +1,5 @@
 -- Создание таблицы для утвержденных видео
-CREATE TABLE IF NOT EXISTS approved_videos (
+CREATE TABLE IF NOT EXISTS kid_app_approved_videos (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS approved_videos (
 );
 
 -- Создание таблицы для заблокированных видео
-CREATE TABLE IF NOT EXISTS blocked_videos (
+CREATE TABLE IF NOT EXISTS kid_app_blocked_videos (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS blocked_videos (
 );
 
 -- Создание таблицы для заблокированных каналов
-CREATE TABLE IF NOT EXISTS blocked_channels (
+CREATE TABLE IF NOT EXISTS kid_app_blocked_channels (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS blocked_channels (
 );
 
 -- Создание таблицы для истории просмотров
-CREATE TABLE IF NOT EXISTS watch_history (
+CREATE TABLE IF NOT EXISTS kid_app_watch_history (
   id SERIAL PRIMARY KEY,
   video_id TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -51,68 +51,68 @@ CREATE TABLE IF NOT EXISTS watch_history (
 );
 
 -- Индексы для оптимизации запросов
-CREATE INDEX IF NOT EXISTS idx_approved_videos_user_id ON approved_videos(user_id);
-CREATE INDEX IF NOT EXISTS idx_blocked_videos_user_id ON blocked_videos(user_id);
-CREATE INDEX IF NOT EXISTS idx_blocked_channels_user_id ON blocked_channels(user_id);
-CREATE INDEX IF NOT EXISTS idx_watch_history_user_id ON watch_history(user_id);
-CREATE INDEX IF NOT EXISTS idx_watch_history_watched_at ON watch_history(watched_at DESC);
+CREATE INDEX IF NOT EXISTS idx_kid_app_approved_videos_user_id ON kid_app_approved_videos(user_id);
+CREATE INDEX IF NOT EXISTS idx_kid_app_blocked_videos_user_id ON kid_app_blocked_videos(user_id);
+CREATE INDEX IF NOT EXISTS idx_kid_app_blocked_channels_user_id ON kid_app_blocked_channels(user_id);
+CREATE INDEX IF NOT EXISTS idx_kid_app_watch_history_user_id ON kid_app_watch_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_kid_app_watch_history_watched_at ON kid_app_watch_history(watched_at DESC);
 
 -- Политики безопасности Row Level Security (RLS)
 
 -- Включаем RLS для всех таблиц
-ALTER TABLE approved_videos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blocked_videos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blocked_channels ENABLE ROW LEVEL SECURITY;
-ALTER TABLE watch_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kid_app_approved_videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kid_app_blocked_videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kid_app_blocked_channels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kid_app_watch_history ENABLE ROW LEVEL SECURITY;
 
--- Политики для approved_videos
+-- Политики для kid_app_approved_videos
 CREATE POLICY "Users can view their own approved videos"
-  ON approved_videos FOR SELECT
+  ON kid_app_approved_videos FOR SELECT
   USING (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can insert their own approved videos"
-  ON approved_videos FOR INSERT
+  ON kid_app_approved_videos FOR INSERT
   WITH CHECK (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can delete their own approved videos"
-  ON approved_videos FOR DELETE
+  ON kid_app_approved_videos FOR DELETE
   USING (user_id = current_setting('app.current_user_id', true));
 
--- Политики для blocked_videos
+-- Политики для kid_app_blocked_videos
 CREATE POLICY "Users can view their own blocked videos"
-  ON blocked_videos FOR SELECT
+  ON kid_app_blocked_videos FOR SELECT
   USING (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can insert their own blocked videos"
-  ON blocked_videos FOR INSERT
+  ON kid_app_blocked_videos FOR INSERT
   WITH CHECK (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can delete their own blocked videos"
-  ON blocked_videos FOR DELETE
+  ON kid_app_blocked_videos FOR DELETE
   USING (user_id = current_setting('app.current_user_id', true));
 
--- Политики для blocked_channels
+-- Политики для kid_app_blocked_channels
 CREATE POLICY "Users can view their own blocked channels"
-  ON blocked_channels FOR SELECT
+  ON kid_app_blocked_channels FOR SELECT
   USING (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can insert their own blocked channels"
-  ON blocked_channels FOR INSERT
+  ON kid_app_blocked_channels FOR INSERT
   WITH CHECK (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can delete their own blocked channels"
-  ON blocked_channels FOR DELETE
+  ON kid_app_blocked_channels FOR DELETE
   USING (user_id = current_setting('app.current_user_id', true));
 
--- Политики для watch_history
+-- Политики для kid_app_watch_history
 CREATE POLICY "Users can view their own watch history"
-  ON watch_history FOR SELECT
+  ON kid_app_watch_history FOR SELECT
   USING (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can insert their own watch history"
-  ON watch_history FOR INSERT
+  ON kid_app_watch_history FOR INSERT
   WITH CHECK (user_id = current_setting('app.current_user_id', true));
 
 CREATE POLICY "Users can delete their own watch history"
-  ON watch_history FOR DELETE
+  ON kid_app_watch_history FOR DELETE
   USING (user_id = current_setting('app.current_user_id', true));

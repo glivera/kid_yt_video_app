@@ -25,7 +25,7 @@ export const getApprovedVideos = async () => {
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
-        .from('approved_videos')
+        .from('kid_app_approved_videos')
         .select('*')
         .eq('user_id', userId)
         .order('approved_at', { ascending: false })
@@ -54,7 +54,7 @@ export const addApprovedVideo = async (video) => {
     try {
       // Проверяем, существует ли уже видео
       const { data: existing } = await supabase
-        .from('approved_videos')
+        .from('kid_app_approved_videos')
         .select('id')
         .eq('id', video.id)
         .eq('user_id', userId)
@@ -67,7 +67,7 @@ export const addApprovedVideo = async (video) => {
 
       // Добавляем новое видео
       const { error } = await supabase
-        .from('approved_videos')
+        .from('kid_app_approved_videos')
         .insert([{
           id: video.id,
           title: video.title,
@@ -113,7 +113,7 @@ export const removeApprovedVideo = async (videoId) => {
   if (isSupabaseConfigured()) {
     try {
       const { error } = await supabase
-        .from('approved_videos')
+        .from('kid_app_approved_videos')
         .delete()
         .eq('id', videoId)
         .eq('user_id', userId)
@@ -146,7 +146,7 @@ export const getBlockedVideos = async () => {
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
-        .from('blocked_videos')
+        .from('kid_app_blocked_videos')
         .select('*')
         .eq('user_id', userId)
         .order('blocked_at', { ascending: false })
@@ -173,7 +173,7 @@ export const addBlockedVideo = async (video) => {
   if (isSupabaseConfigured()) {
     try {
       const { data: existing } = await supabase
-        .from('blocked_videos')
+        .from('kid_app_blocked_videos')
         .select('id')
         .eq('id', video.id)
         .eq('user_id', userId)
@@ -184,7 +184,7 @@ export const addBlockedVideo = async (video) => {
       }
 
       const { error } = await supabase
-        .from('blocked_videos')
+        .from('kid_app_blocked_videos')
         .insert([{
           id: video.id,
           title: video.title,
@@ -227,7 +227,7 @@ export const removeBlockedVideo = async (videoId) => {
   if (isSupabaseConfigured()) {
     try {
       const { error } = await supabase
-        .from('blocked_videos')
+        .from('kid_app_blocked_videos')
         .delete()
         .eq('id', videoId)
         .eq('user_id', userId)
@@ -260,7 +260,7 @@ export const getBlockedChannels = async () => {
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
-        .from('blocked_channels')
+        .from('kid_app_blocked_channels')
         .select('*')
         .eq('user_id', userId)
         .order('blocked_at', { ascending: false })
@@ -287,7 +287,7 @@ export const addBlockedChannel = async (channel) => {
   if (isSupabaseConfigured()) {
     try {
       const { data: existing } = await supabase
-        .from('blocked_channels')
+        .from('kid_app_blocked_channels')
         .select('id')
         .eq('id', channel.id)
         .eq('user_id', userId)
@@ -298,7 +298,7 @@ export const addBlockedChannel = async (channel) => {
       }
 
       const { error } = await supabase
-        .from('blocked_channels')
+        .from('kid_app_blocked_channels')
         .insert([{
           id: channel.id,
           name: channel.name,
@@ -340,7 +340,7 @@ export const removeBlockedChannel = async (channelId) => {
   if (isSupabaseConfigured()) {
     try {
       const { error } = await supabase
-        .from('blocked_channels')
+        .from('kid_app_blocked_channels')
         .delete()
         .eq('id', channelId)
         .eq('user_id', userId)
@@ -378,7 +378,7 @@ export const getWatchHistory = async () => {
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
-        .from('watch_history')
+        .from('kid_app_watch_history')
         .select('*')
         .eq('user_id', userId)
         .order('watched_at', { ascending: false })
@@ -407,14 +407,14 @@ export const addToWatchHistory = async (video) => {
     try {
       // Удаляем предыдущую запись этого видео, если есть
       await supabase
-        .from('watch_history')
+        .from('kid_app_watch_history')
         .delete()
         .eq('video_id', video.id)
         .eq('user_id', userId)
 
       // Добавляем новую запись
       const { error } = await supabase
-        .from('watch_history')
+        .from('kid_app_watch_history')
         .insert([{
           video_id: video.id,
           title: video.title,
@@ -462,7 +462,7 @@ export const clearWatchHistory = async () => {
   if (isSupabaseConfigured()) {
     try {
       const { error } = await supabase
-        .from('watch_history')
+        .from('kid_app_watch_history')
         .delete()
         .eq('user_id', userId)
 
