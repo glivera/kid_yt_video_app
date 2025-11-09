@@ -1,9 +1,8 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import VideoSearch from '../../components/Parent/VideoSearch'
+import VideoSearchAndRecommendations from '../../components/Parent/VideoSearchAndRecommendations'
 import ApprovedVideos from '../../components/Parent/ApprovedVideos'
 import BlockedList from '../../components/Parent/BlockedList'
-import Recommendations from '../../components/Parent/Recommendations'
 import './ParentDashboard.css'
 
 const ParentDashboard = () => {
@@ -11,10 +10,9 @@ const ParentDashboard = () => {
   const location = useLocation()
 
   const navigation = [
-    { path: '/parent/search', label: 'Поиск видео', component: VideoSearch },
+    { path: '/parent/search', label: 'Поиск и рекомендации', component: VideoSearchAndRecommendations },
     { path: '/parent/approved', label: 'Утвержденные', component: ApprovedVideos },
-    { path: '/parent/blocked', label: 'Заблокированные', component: BlockedList },
-    { path: '/parent/recommendations', label: 'Рекомендации', component: Recommendations }
+    { path: '/parent/blocked', label: 'Заблокированные', component: BlockedList }
   ]
 
   return (
@@ -50,7 +48,7 @@ const ParentDashboard = () => {
               element={<item.component />}
             />
           ))}
-          <Route path="*" element={<VideoSearch />} />
+          <Route path="*" element={<VideoSearchAndRecommendations />} />
         </Routes>
       </main>
     </div>
