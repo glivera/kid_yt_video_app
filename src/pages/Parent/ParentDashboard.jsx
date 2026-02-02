@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import VideoSearchAndRecommendations from '../../components/Parent/VideoSearchAndRecommendations'
@@ -8,6 +9,15 @@ import './ParentDashboard.css'
 const ParentDashboard = () => {
   const { user, logout } = useAuth()
   const location = useLocation()
+  const [codeCopied, setCodeCopied] = useState(false)
+
+  const copyFamilyCode = () => {
+    if (user?.family_code) {
+      navigator.clipboard.writeText(user.family_code)
+      setCodeCopied(true)
+      setTimeout(() => setCodeCopied(false), 2000)
+    }
+  }
 
   const navigation = [
     { path: '/parent/search', label: 'Поиск и рекомендации', component: VideoSearchAndRecommendations },
@@ -20,6 +30,13 @@ const ParentDashboard = () => {
       <header className="dashboard-header">
         <h1>Родительская панель</h1>
         <div className="header-user">
+          {user?.family_code && (
+            <div className="family-code-badge" onClick={copyFamilyCode} title="Нажмите, чтобы скопировать">
+              <span className="family-code-label">Семейный код:</span>
+              <span className="family-code-value">{user.family_code}</span>
+              <span className="family-code-copy">{codeCopied ? 'Скопировано!' : 'Копировать'}</span>
+            </div>
+          )}
           <span>Привет, {user?.username}!</span>
           <button onClick={logout} className="button button-secondary">
             Выйти

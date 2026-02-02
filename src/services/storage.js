@@ -1,13 +1,37 @@
 import { supabase } from '../config/supabase'
 
-// Получаем ID текущего пользователя из localStorage (временно, пока не настроена полная авторизация)
-const getCurrentUserId = () => {
-  const user = localStorage.getItem('user')
-  if (user) {
-    const userData = JSON.parse(user)
-    return userData.username || 'guest'
+// Получаем ID текущего пользователя из Supabase Auth сессии
+const getCurrentUserId = async () => {
+  if (!supabase) return 'guest'
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    return session?.user?.id || 'guest'
+  } catch (error) {
+    console.error('Ошибка получения ID пользователя:', error)
+    return 'guest'
   }
-  return 'guest'
+}
+
+// Получаем family_code текущего пользователя
+const getCurrentFamilyCode = async () => {
+  if (!supabase) return null
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user?.id) return null
+
+    const { data, error } = await supabase
+      .from('kid_app_users')
+      .select('family_code')
+      .eq('id', session.user.id)
+      .single()
+
+    if (error) return null
+    return data?.family_code || null
+  } catch {
+    return null
+  }
 }
 
 // Проверяем, настроен ли Supabase
@@ -20,21 +44,26 @@ const isSupabaseConfigured = () => {
 // ========================================
 
 export const getApprovedVideos = async () => {
-  const userId = getCurrentUserId()
-
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+      let query = supabase
         .from('kid_app_approved_videos')
         .select('*')
-        .eq('user_id', userId)
         .order('approved_at', { ascending: false })
 
+      if (familyCode) {
+        query = query.eq('family_code', familyCode)
+      } else {
+        const userId = await getCurrentUserId()
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       return data || []
     } catch (error) {
       console.error('Error fetching approved videos from Supabase:', error)
-      // Fallback to localStorage
       return getApprovedVideosFromLocalStorage()
     }
   } else {
@@ -48,17 +77,25 @@ const getApprovedVideosFromLocalStorage = () => {
 }
 
 export const addApprovedVideo = async (video) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
-      // Проверяем, существует ли уже видео
-      const { data: existing } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+
+      // Проверяем, существует ли уже видео в семье
+      let checkQuery = supabase
         .from('kid_app_approved_videos')
         .select('id')
         .eq('id', video.id)
-        .eq('user_id', userId)
-        .single()
+
+      if (familyCode) {
+        checkQuery = checkQuery.eq('family_code', familyCode)
+      } else {
+        checkQuery = checkQuery.eq('user_id', userId)
+      }
+
+      const { data: existing } = await checkQuery.single()
 
       if (existing) {
         console.log('Video already approved')
@@ -77,14 +114,14 @@ export const addApprovedVideo = async (video) => {
           channel_id: video.channelId || video.channel_id || '',
           duration: video.duration || '',
           view_count: video.viewCount || video.view_count || '0',
-          user_id: userId
+          user_id: userId,
+          family_code: familyCode
         }])
 
       if (error) throw error
       return await getApprovedVideos()
     } catch (error) {
       console.error('Error adding approved video to Supabase:', error)
-      // Fallback to localStorage
       return addApprovedVideoToLocalStorage(video)
     }
   } else {
@@ -108,7 +145,7 @@ const addApprovedVideoToLocalStorage = (video) => {
 }
 
 export const removeApprovedVideo = async (videoId) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
@@ -141,16 +178,22 @@ const removeApprovedVideoFromLocalStorage = (videoId) => {
 // ========================================
 
 export const getBlockedVideos = async () => {
-  const userId = getCurrentUserId()
-
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+      let query = supabase
         .from('kid_app_blocked_videos')
         .select('*')
-        .eq('user_id', userId)
         .order('blocked_at', { ascending: false })
 
+      if (familyCode) {
+        query = query.eq('family_code', familyCode)
+      } else {
+        const userId = await getCurrentUserId()
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       return data || []
     } catch (error) {
@@ -168,16 +211,24 @@ const getBlockedVideosFromLocalStorage = () => {
 }
 
 export const addBlockedVideo = async (video) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
-      const { data: existing } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+
+      let checkQuery = supabase
         .from('kid_app_blocked_videos')
         .select('id')
         .eq('id', video.id)
-        .eq('user_id', userId)
-        .single()
+
+      if (familyCode) {
+        checkQuery = checkQuery.eq('family_code', familyCode)
+      } else {
+        checkQuery = checkQuery.eq('user_id', userId)
+      }
+
+      const { data: existing } = await checkQuery.single()
 
       if (existing) {
         return await getBlockedVideos()
@@ -192,7 +243,8 @@ export const addBlockedVideo = async (video) => {
           thumbnail: video.thumbnail || '',
           channel: video.channel || '',
           channel_id: video.channelId || video.channel_id || '',
-          user_id: userId
+          user_id: userId,
+          family_code: familyCode
         }])
 
       if (error) throw error
@@ -222,7 +274,7 @@ const addBlockedVideoToLocalStorage = (video) => {
 }
 
 export const removeBlockedVideo = async (videoId) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
@@ -255,16 +307,22 @@ const removeBlockedVideoFromLocalStorage = (videoId) => {
 // ========================================
 
 export const getBlockedChannels = async () => {
-  const userId = getCurrentUserId()
-
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+      let query = supabase
         .from('kid_app_blocked_channels')
         .select('*')
-        .eq('user_id', userId)
         .order('blocked_at', { ascending: false })
 
+      if (familyCode) {
+        query = query.eq('family_code', familyCode)
+      } else {
+        const userId = await getCurrentUserId()
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       return data || []
     } catch (error) {
@@ -282,16 +340,24 @@ const getBlockedChannelsFromLocalStorage = () => {
 }
 
 export const addBlockedChannel = async (channel) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
-      const { data: existing } = await supabase
+      const familyCode = await getCurrentFamilyCode()
+
+      let checkQuery = supabase
         .from('kid_app_blocked_channels')
         .select('id')
         .eq('id', channel.id)
-        .eq('user_id', userId)
-        .single()
+
+      if (familyCode) {
+        checkQuery = checkQuery.eq('family_code', familyCode)
+      } else {
+        checkQuery = checkQuery.eq('user_id', userId)
+      }
+
+      const { data: existing } = await checkQuery.single()
 
       if (existing) {
         return await getBlockedChannels()
@@ -305,7 +371,8 @@ export const addBlockedChannel = async (channel) => {
           description: channel.description || '',
           thumbnail: channel.thumbnail || '',
           subscriber_count: channel.subscriberCount || channel.subscriber_count || '0',
-          user_id: userId
+          user_id: userId,
+          family_code: familyCode
         }])
 
       if (error) throw error
@@ -335,7 +402,7 @@ const addBlockedChannelToLocalStorage = (channel) => {
 }
 
 export const removeBlockedChannel = async (channelId) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
@@ -368,12 +435,15 @@ export const isChannelBlocked = async (channelId) => {
   return channels.some(c => c.id === channelId)
 }
 
+// Экспортируем для использования в компонентах
+export { getCurrentFamilyCode }
+
 // ========================================
 // ИСТОРИЯ ПРОСМОТРОВ
 // ========================================
 
 export const getWatchHistory = async () => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
@@ -401,7 +471,7 @@ const getWatchHistoryFromLocalStorage = () => {
 }
 
 export const addToWatchHistory = async (video) => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
@@ -457,7 +527,7 @@ const addToWatchHistoryToLocalStorage = (video) => {
 }
 
 export const clearWatchHistory = async () => {
-  const userId = getCurrentUserId()
+  const userId = await getCurrentUserId()
 
   if (isSupabaseConfigured()) {
     try {
